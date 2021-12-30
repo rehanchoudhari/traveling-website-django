@@ -1,0 +1,44 @@
+
+
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html"
+      xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Hello, world!</title>
+  </head>
+  <style>
+    body{
+    background-image:url('https://www.pixelstalk.net/wp-content/uploads/2016/08/HD-World-Travel-Desktop-Background.jpg');
+    }
+    h2{
+    color:cyan;
+    font-style: italic;
+    }
+    h3{
+    color:orange;
+    }
+    h4{
+    color:yellow;
+    }
+
+  </style>
+  <body>
+  <center>
+    <br>
+
+
+    <img src="{{res.img.url}}" class="img-fluid" alt="Responsive image" width="350" border="3px solid"><br><br>
+
+  <div><h2>{{res.name}}</h2></div><br>
+  <div><h3> Rs. {{res.price}}/-</h3></div><br>
+    <div><h4>{{res.desc}}</h4></div><br>
+    <button type="button" ><a href="/login/">Buy</a></button>
+
+  </center>
+  </body>
+</html>
