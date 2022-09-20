@@ -14,4 +14,4 @@ jobs:
           asoc_key: ${{8b8c367b-fbd0-9909-4aff-60af56e3a21e}}
           asoc_secret: ${{kiXAlXEtwLGEgPNIOMT8jqR5ACriE9eCmwNqAwkySlA=}}
     env: 
-      GITHUB_TOKEN: ${{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}}
+      GITHUB_TOKEN: ${{}}
