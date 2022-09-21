@@ -86,5 +86,5 @@ def cart_session(request):
     return redirect{'name':name}
 def shorting(request):
     username = request.POST['username']
-    return render ()
+    return render "?"
 
