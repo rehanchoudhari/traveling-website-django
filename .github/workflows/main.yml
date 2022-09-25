@@ -31,13 +31,13 @@ jobs:
           $PSVersionTable
         shell: pwsh
       # Runs a set of commands using the runners shell
-      - name: List directory
-        run: |
-          ls
-        shell: pwsh
+#       - name: List directory
+#         run: |
+#           ls
+#         shell: pwsh
       
-      - name: Run donet -build
-        run: dotnet.exe publish -c Release -r win-x64
+#       - name: Run donet -build
+#         run: dotnet.exe publish -c Release -r win-x64
       
       # Runs AppScan Step
       - name: Perform HCL AppScan Security Analysis
