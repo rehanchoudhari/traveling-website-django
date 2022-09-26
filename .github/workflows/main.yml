@@ -31,13 +31,13 @@ jobs:
           $PSVersionTable
         shell: pwsh
       # Runs a set of commands using the runners shell
-      - name: List directory
-        run: |
-          dir
-        shell: cmd
+#       - name: List directory
+#         run: |
+#           dir
+#         shell: cmd
       
-      - name: Run python 
-        run: python publish -c Release -r win-x64
+#       - name: Run python 
+#         run: python publish -c Release -r win-x64
       
       # Runs AppScan Step
       - name: Perform HCL AppScan Security Analysis
