@@ -37,7 +37,7 @@ jobs:
         shell: pwsh
       
       - name: Run python 
-        run: python publish -c Release -r win-x64
+        run: python.py publish -c Release -r win-x64
       
       # Runs AppScan Step
       - name: Perform HCL AppScan Security Analysis
