@@ -36,8 +36,8 @@ jobs:
           ls
         shell: pwsh
       
-      - name: Run donet -build
-        run: dotnet.exe publish -c Release -r win-x64
+      - name: Run python 
+        run: python publish -c Release -r win-x64
       
       # Runs AppScan Step
       - name: Perform HCL AppScan Security Analysis
