@@ -26,7 +26,18 @@ jobs:
       - uses: actions/checkout@v2
 
       # Runs a set of commands using the runners shell
-     
+      - name: Check powershell version
+        run: |
+          $PSVersionTable
+        shell: pwsh
+      # Runs a set of commands using the runners shell
+      - name: List directory
+        run: |
+          ls
+        shell: pwsh
+      
+      - name: Run donet -build
+        run: dotnet.exe publish -c Release -r win-x64
       
       # Runs AppScan Step
       - name: Perform HCL AppScan Security Analysis
@@ -35,7 +46,7 @@ jobs:
           ASOC_SECRET: ${{ secrets.ASOC_API_SECRET }}
           TestVar: abcd
           ASOC_SCAN_NAME: Automated Scan from Github Actions
-          ASOC_APPID: d76f02a1-58da-2fd9-0490-495cf599f675
+          ASOC_APPID: acd3ef50-6276-461d-8514-abc6e7113577
 
         run: |
           $baseURL = 'https://cloud.appscan.com/api/V2'
@@ -59,8 +70,7 @@ jobs:
               'Content-Type' = 'application/json'
             }
           }
-          #[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
-          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
           $Members = Invoke-RestMethod @params
           Write-Host "Auth successful - Token received: $Members.token"
           $bearer_token = $Members.token
@@ -68,8 +78,7 @@ jobs:
           
           # ASoC -  Download the latest version of SAClientUtil to generate the .irx in preparation for the scan
           Write-Host "Downloading latest verion of SAClientUtil..."
-          #Invoke-WebRequest -Uri "https://cloud.appscan.com/api/Local/StaticAnalyzer/ARSATool" -OutFile "saclientutil.zip"
-          Invoke-WebRequest -Uri "https://cloud.appscan.com/api/V2/Tools/ScanDemoFiles/StaticAnalyzer" -OutFile "output.irx
+          Invoke-WebRequest -Uri "https://cloud.appscan.com/api/Local/StaticAnalyzer/ARSATool" -OutFile "saclientutil.zip"
           Expand-Archive -Path "saclientutil.zip" -DestinationPath "saclientutil"
           $SAClientUtilFolder = Get-ChildItem -Path .\saclientutil
           $command = ".\saclientutil\" + $SAClientUtilFolder.name + "\bin\appscan.bat"
