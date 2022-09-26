@@ -71,7 +71,7 @@ jobs:
             }
           }
           #[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
-          version:[3.8]
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           $Members = Invoke-RestMethod @params
           Write-Host "Auth successful - Token received: $Members.token"
           $bearer_token = $Members.token
