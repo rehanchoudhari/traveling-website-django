@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Configuration>
+  <Targets>
+    <Target path="">
+      <Exclude>traveling-website\travel_center\template\login.html</Exclude>
+      <Exclude>traveling-website\travel_center\main.yml</Exclude>
+      <Exclude>traveling-website\.github\workflows\main.yml</Exclude>
+      <Exclude>traveling-website\travel_center\template\index.html</Exclude>
+      <Exclude>traveling-website\travel_center\template\register.html</Exclude>
+      <Exclude>traveling-website\travel_center\template\checking.html</Exclude>
+    </Target>
+  </Targets>
+</Configuration>
