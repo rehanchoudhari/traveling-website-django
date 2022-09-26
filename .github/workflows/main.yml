@@ -36,15 +36,17 @@ jobs:
           ls
         shell: pwsh
       
-      - name: Run python -build
-        run: python.exe publish -c Release -r win-x64
+      - name: Run donet -build
+        run: dotnet.exe publish -c Release -r win-x64
       
       # Runs AppScan Step
       - name: Perform HCL AppScan Security Analysis
         env:
           ASOC_KEY: ${{ secrets.ASOC_API_KEY }}
           ASOC_SECRET: ${{ secrets.ASOC_API_SECRET }}
+          TestVar: abcd
           ASOC_SCAN_NAME: Automated Scan from Github Actions
+          ASOC_APPID: acd3ef50-6276-461d-8514-abc6e7113577
 
         run: |
           $baseURL = 'https://cloud.appscan.com/api/V2'
