@@ -1,45 +1,19 @@
-# This is a basic workflow to help you get started with Actions
-
-name: AppScan on Cloud SAST workflow
-
-# Controls when the action will run. 
+name: "HCL AppScan CodeSweep"
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  #push:
-  #  branches: [ master ]
   pull_request:
-    branches: [ master ]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+    types: master
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  scan:
     runs-on: windows-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
-      # Runs a set of commands using the runners shell
-      - name: Check powershell version
-        run: |
-          $PSVersionTable
-        shell: pwsh
-      # Runs a set of commands using the runners shell
-#       - name: List directory
-#         run: |
-#           dir
-#         shell: cmd
-      
-#       - name: Run python 
-#         run: python publish -c Release -r win-x64
-      
-      # Runs AppScan Step
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Run AppScan CodeSweep
+        uses: HCL-TECH-SOFTWARE/appscan-codesweep-action@v2
+        with:
+          asoc_key: ${{secrets.ASOC_KEY}}
+          asoc_secret: ${{secrets.ASOC_SECRET}}
+         # Runs AppScan Step
       - name: Perform HCL AppScan Security Analysis
         env:
           ASOC_KEY: ${{ secrets.ASOC_API_KEY }}
@@ -86,9 +60,7 @@ jobs:
           
           # Comment out this lines for a proper .irx generation. This line is for demo purposes, it only downloads a sample .irx file that is not related to the source code in this repo
           # Invoke-WebRequest -Uri "https://cloud.appscan.com/api/V2/Tools/ScanDemoFiles/StaticAnalyzer" -OutFile "output.irx"
-
           # ASoC - Upload the .irx file onto ASoC
-
           $irx_file = [IO.File]::ReadAllBytes('output.irx')
           $params = @{
             Uri         = "$baseURL/FileUpload"
@@ -277,3 +249,5 @@ jobs:
         with:
           name: AppScan Static Analysis XML Security Scan Report 
           path: AppScan_Security_Report.xml
+    env: 
+      GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
