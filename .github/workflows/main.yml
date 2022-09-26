@@ -26,18 +26,7 @@ jobs:
       - uses: actions/checkout@v2
 
       # Runs a set of commands using the runners shell
-      - name: Check powershell version
-        run: |
-          $PSVersionTable
-        shell: pwsh
-      # Runs a set of commands using the runners shell
-      - name: List directory
-        run: |
-          ls
-        shell: pwsh
-      
-      - name: Run python -build
-        run: python.exe publish -c Release -r win-x64
+     
       
       # Runs AppScan Step
       - name: Perform HCL AppScan Security Analysis
@@ -46,7 +35,7 @@ jobs:
           ASOC_SECRET: ${{ secrets.ASOC_API_SECRET }}
           TestVar: abcd
           ASOC_SCAN_NAME: Automated Scan from Github Actions
-          ASOC_APPID: acd3ef50-6276-461d-8514-abc6e7113577
+          ASOC_APPID: d76f02a1-58da-2fd9-0490-495cf599f675
 
         run: |
           $baseURL = 'https://cloud.appscan.com/api/V2'
