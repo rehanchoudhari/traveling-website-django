@@ -36,8 +36,8 @@ jobs:
           ls
         shell: pwsh
       
-      - name: Run donet -build
-        run: dotnet.exe publish -c Release -r win-x64
+      - name: python -build
+        run: python.exe publish -c Release -r win-x64
       
       # Runs AppScan Step
       - name: Perform HCL AppScan Security Analysis
@@ -70,6 +70,7 @@ jobs:
               'Content-Type' = 'application/json'
             }
           }
+          DOTNET_CLI_TELEMETRY_OPTOUT: 1
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
           $Members = Invoke-RestMethod @params
           Write-Host "Auth successful - Token received: $Members.token"
