@@ -35,6 +35,14 @@ jobs:
           dir
         shell: pwsh
         
+      - name: run python -build
+        run: |
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+        
       - name: Perform HCL AppScan Security Analysis
         env:
           ASOC_KEY: ${{ secrets.ASOC_API_KEY }}
