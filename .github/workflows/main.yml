@@ -24,10 +24,17 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       
+      # check powershell version
       - name: check powershell version
         run: |
           $PSVersionTable
         shell: pwsh
+      # list all directory
+      - name: List directory
+        run: |
+          dir
+        shell: pwsh
+          
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: echo Hello, world!
