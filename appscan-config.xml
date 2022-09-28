@@ -1,5 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<Configuration>
-  <Targets path="traveling-website">
+<Configuration attributes="true/false">
+  <Targets>
+    <Target outputs-only="true/false" path="traveling-website">
+      <CustomBuildInfo build_info="info"/>
+      <Include>string_pattern</Include>
+      <Exclude>string_pattern</Exclude>
+    </Target>
   </Targets>
 </Configuration>
