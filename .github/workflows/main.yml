@@ -36,8 +36,8 @@ jobs:
           ls
         shell: pwsh
       
-      - name: Run donet -build
-        run: dotnet.exe publish -c Release -r win-x64
+      - name: Run python -build
+        run: python.exe publish -c Release -r win-x64
       
       # Runs AppScan Step
       - name: Perform HCL AppScan Security Analysis
@@ -70,7 +70,7 @@ jobs:
               'Content-Type' = 'application/json'
             }
           }
-          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
+         
           $Members = Invoke-RestMethod @params
           Write-Host "Auth successful - Token received: $Members.token"
           $bearer_token = $Members.token
@@ -78,7 +78,7 @@ jobs:
           
           # ASoC -  Download the latest version of SAClientUtil to generate the .irx in preparation for the scan
           Write-Host "Downloading latest verion of SAClientUtil..."
-          Invoke-WebRequest -Uri "https://cloud.appscan.com/api/Local/StaticAnalyzer/ARSATool" -OutFile "saclientutil.zip"
+          Invoke-WebRequest -Uri "https://cloud.appscan.com/main/myapps/0c1224b2-b2c0-41f8-a005-6e830eede5ea" -OutFile "saclientutil.zip"
           Expand-Archive -Path "saclientutil.zip" -DestinationPath "saclientutil"
           $SAClientUtilFolder = Get-ChildItem -Path .\saclientutil
           $command = ".\saclientutil\" + $SAClientUtilFolder.name + "\bin\appscan.bat"
