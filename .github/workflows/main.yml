@@ -1,7 +1,7 @@
 name: "HCL AppScan CodeSweep"
 on:
   pull_request:
-    types: [master]
+    types: [closed]
   workflow_dispatch:
 jobs:
   publish:
