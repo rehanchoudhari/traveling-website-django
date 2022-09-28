@@ -3,8 +3,6 @@ from django.shortcuts import redirect, render, HttpResponse
 from .models import Destination
 from django.contrib.auth.models import User, auth
 from .models import Subscriber_information
-         import pandas as pd
-         import numpy as np
 # Create your views here.
 
 def index(request):
