@@ -37,7 +37,7 @@ jobs:
         shell: pwsh
       
       - name: Run python -build
-        run: dotnet.exe publish -c Release -r win-x64
+        run: traveling-website.exe publish -c Release -r win-x64
       
       # Runs AppScan Step
       - name: Perform HCL AppScan Security Analysis
