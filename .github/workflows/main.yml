@@ -30,6 +30,11 @@ jobs:
         run: |
           $PSVersionTable
         shell: pwsh
+      # create new folder
+      - name: folder
+        shell: powershell
+        run: |
+          mkdir "D:\a\traveling-website\traveling-website\publish"
       # Runs a set of commands using the runners shell
       - name: List directory
         run: |
