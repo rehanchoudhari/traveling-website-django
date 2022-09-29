@@ -15,4 +15,4 @@ jobs:
           publish_on_merge: true
           application_id: 7740e7ba-3f62-4dd7-bdcf-5ce35138e518
     env: 
-      GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      GITHUB_TOKEN: abcd
