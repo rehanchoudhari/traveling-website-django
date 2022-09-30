@@ -14,5 +14,8 @@ jobs:
           asoc_secret: ${{secrets.ASOC_SECRET}}
           publish_on_merge: true
           application_id: 7740e7ba-3f62-4dd7-bdcf-5ce35138e518
+          issue_status: "inprogress"
+          scan_base_name: "CodeSweep"
+          personal_scan: true
     env: 
       GITHUB_TOKEN: abcd
