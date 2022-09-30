@@ -1,11 +1,11 @@
 name: "HCL AppScan CodeSweep"
 on:
   pull_request:
-    types: [closed]
+    types: [open]
   workflow_dispatch:
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Publish issues to ASoC
         uses: HCL-TECH-SOFTWARE/appscan-codesweep-action@v2
