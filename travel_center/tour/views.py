@@ -3,7 +3,6 @@ from django.shortcuts import redirect, render, HttpResponse
 from .models import Destination
 from django.contrib.auth.models import User, auth
 from .models import Subscriber_information
-        import pandas as pd
 # Create your views here.
 
 def index(request):
@@ -28,11 +27,11 @@ def detail(request):
    
         
 
-# def detail(request):
-#     username = request.POST['username']
-#     email = request.POST['email']
-#     user = Subscriber_information.objects.create_user(username=username, email=email)
-#     user.save();
+def detail(request):
+    username = request.POST['username']
+    email = request.POST['email']
+    user = Subscriber_information.objects.create_user(username=username, email=email)
+    user.save();
 
 
 def register(request):
