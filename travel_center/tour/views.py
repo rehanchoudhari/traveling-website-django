@@ -109,6 +109,4 @@ def register(request):
             
         return redirect("register")
         
-    else:
-        return render(request, 'register.html')
-    
+
