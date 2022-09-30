@@ -17,5 +17,3 @@ jobs:
           issue_status: "inprogress"
           scan_base_name: "CodeSweep"
           personal_scan: true
-    env: 
-      GITHUB_TOKEN: abcd
