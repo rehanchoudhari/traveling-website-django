@@ -1,21 +1,275 @@
-name: "HCL AppScan CodeSweep"
+# This is a basic workflow to help you get started with Actions
+
+name: AppScan on Cloud SAST workflow
+
+# Controls when the action will run. 
 on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  #push:
+  #  branches: [ master ]
   pull_request:
-    types: [closed]
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  publish:
-    runs-on: ubuntu-latest
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Publish issues to ASoC
-        uses: HCL-TECH-SOFTWARE/appscan-codesweep-action@v2
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      - name: Set up python
+        uses: action/setup-python@4
         with:
-          asoc_key: ${{secrets.ASOC_KEY}}
-          asoc_secret: ${{secrets.ASOC_SECRET}}
-          publish_on_merge: true
-          application_id: 7740e7ba-3f62-4dd7-bdcf-5ce35138e518
-          issue_status: "inprogress"
-          scan_base_name: "CodeSweep"
-          personal_scan: true
-    env: 
-     GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+      - name: Build package
+        run: python -m build
+      
+      # Runs AppScan Step
+      - name: Perform HCL AppScan Security Analysis
+        env:
+          ASOC_KEY: ${{ secrets.ASOC_API_KEY }}
+          ASOC_SECRET: ${{ secrets.ASOC_API_SECRET }}
+          TestVar: abcd
+          ASOC_SCAN_NAME: Automated Scan from Github Actions
+          ASOC_APPID: b29462b1-810c-4e83-afcb-18dd6b5bc327
+
+        run: |
+          $baseURL = 'https://cloud.appscan.com/api/V2'
+          $env:ASoC_appID = $env:ASOC_APPID
+          $env:ASoC_scanName = $env:ASOC_SCAN_NAME
+          $env:ASoC_IRX_Config_file = "appscan-config.xml"
+          $bearer_token =''
+          
+          # ASoC - Login to ASoC with API Key and Secret
+          $jsonBody = "
+            {
+            `"KeyId`": `"$env:ASOC_KEY`",
+            `"KeySecret`": `"$env:ASOC_SECRET`"
+            }
+          "
+          $params = @{
+          Uri         = "$baseURL/Account/ApiKeyLogin"
+          Method      = 'POST'
+          Body        = $jsonBody
+          Headers = @{
+              'Content-Type' = 'application/json'
+            }
+          }
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
+          $Members = Invoke-RestMethod @params
+          Write-Host "Auth successful - Token received: $Members.token"
+          $bearer_token = $Members.token
+          $ProgressPreference = 'SilentlyContinue'
+          
+          # ASoC -  Download the latest version of SAClientUtil to generate the .irx in preparation for the scan
+          Write-Host "Downloading latest verion of SAClientUtil..."
+          Invoke-WebRequest -Uri "https://cloud.appscan.com/api/Local/StaticAnalyzer/ARSATool" -OutFile "saclientutil.zip"
+          Expand-Archive -Path "saclientutil.zip" -DestinationPath "saclientutil"
+          $SAClientUtilFolder = Get-ChildItem -Path .\saclientutil
+          $command = ".\saclientutil\" + $SAClientUtilFolder.name + "\bin\appscan.bat"
+          & $command prepare -c $env:ASoC_IRX_Config_file -n output.irx
+          
+          # Comment out this lines for a proper .irx generation. This line is for demo purposes, it only downloads a sample .irx file that is not related to the source code in this repo
+          # Invoke-WebRequest -Uri "https://cloud.appscan.com/api/V2/Tools/ScanDemoFiles/StaticAnalyzer" -OutFile "output.irx"
+
+          # ASoC - Upload the .irx file onto ASoC
+
+          $irx_file = [IO.File]::ReadAllBytes('output.irx')
+          $params = @{
+            Uri         = "$baseURL/FileUpload"
+            Method      = 'Post'
+            Headers = @{
+              'Content-Type' = 'multipart/form-data'
+              Authorization = "Bearer $bearer_token"
+            }
+             Form = @{
+            'fileToUpload' = Get-Item -Path "output.irx"
+           }
+          }
+          $upload = Invoke-RestMethod @params
+          $upload_File_ID = $upload.FileId
+          write-host "IRX Uploaded File ID: $upload_File_ID"
+          
+          # ASoC - Execute a Static (SAST) Scan on ASoC by specifying the upload_File_ID
+          
+          $params = @{
+            Uri         = "$baseURL/Scans/StaticAnalyzer"
+            Method      = 'Post'
+            Headers = @{
+              'Content-Type' = 'application/json'
+              Authorization = "Bearer $bearer_token"
+            }
+          }
+          $body = @{
+             'ApplicationFileId' = "$upload_File_ID"
+             'ScanName' = "$env:ASoC_scanName"
+             'EnableMailNotification' = "true"
+             'Locale' = "en-US"
+             'AppId' = "$env:ASoC_appID"
+             'Execute' = "true"
+             'FullyAutomatic' = "false"
+             'Personal' = "false"
+          }
+          $output_runscan = Invoke-RestMethod @params -Body ($body|ConvertTo-JSON)
+          write-host "Scan executed"
+          Write-Host $output_runscan
+          $scan_ID = $output_runscan.Id
+          
+          # ASoC - Checking for scan completion status
+          
+          $params = @{
+            Uri         = "$baseURL/Scans/$scan_ID/Executions"
+            Method      = 'Get'
+            Headers = @{
+              'Content-Type' = 'application/json'
+              Authorization = "Bearer $bearer_token"
+            }
+          }
+          $scan_status ="Not Ready"
+          while($scan_status -ne "Ready"){
+            $output = Invoke-RestMethod @params
+            $scan_status = $output.Status
+            Start-Sleep -Seconds 10
+            Write-Host "Waiting for Scan Completion..."
+          }
+          
+          # ASoC - Generate a HTML report on the completed scan by specifying the scan_ID
+          
+          $params = @{
+            Uri         = "$baseURL/Reports/Security/Scan/$scan_ID"
+            Method      = 'Post'
+            Headers = @{
+              'Content-Type' = 'application/json'
+              Authorization = "Bearer $bearer_token"
+            }
+          }
+          $body = @{
+            'Configuration' = @{
+              'Summary' = "true"
+              'Details' = "true"
+              'Discussion' = "true"
+              'Overview' = "true"
+              'TableOfContent' = "true"
+              'Advisories' = "true"
+              'FixRecommendation' = "true"
+              'History' = "true"
+              'Coverage' = "true"
+              'MinimizeDetails' = "true"
+              'Articles' = "true"
+              'ReportFileType' = "HTML"
+              'Title' = "false"
+              'Locale' = "en-US"
+            }
+          }
+          $output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-JSON)
+          $report_ID = $output_runreport.Id
+          #Wait for report
+          $params = @{
+            Uri         = "$baseURL/Reports/$report_ID"
+            Method      = 'Get'
+            Headers = @{
+              'Content-Type' = 'application/json'
+              Authorization = "Bearer $bearer_token"
+            }
+          }
+          $report_status ="Not Ready"
+          while($report_status -ne "Ready"){
+            $output = Invoke-RestMethod @params
+            $report_status = $output.Status
+            Start-Sleep -Seconds 5
+            Write-Host "Generating Report... Progress: " $output.Progress "%"
+          }
+          #Download Report
+          $params = @{
+            Uri         = "$baseURL/Reports/Download/$report_ID"
+            Method      = 'Get'
+            Headers = @{
+              'Accept' = 'text/html'
+              Authorization = "Bearer $bearer_token"
+            }
+          }
+          $output_runreport = Invoke-RestMethod @params
+          Out-File -InputObject $output_runreport -FilePath .\AppScan_Security_Report.html
+          
+          # ASoC - Generate an XML report on the completed scan by specifying the scan_ID
+          
+          $params = @{
+            Uri         = "$baseURL/Reports/Security/Scan/$scan_ID"
+            Method      = 'Post'
+            Headers = @{
+              'Content-Type' = 'application/json'
+              Authorization = "Bearer $bearer_token"
+            }
+          }
+          $body = @{
+            'Configuration' = @{
+              'Summary' = "true"
+              'Details' = "true"
+              'Discussion' = "true"
+              'Overview' = "true"
+              'TableOfContent' = "true"
+              'Advisories' = "true"
+              'FixRecommendation' = "true"
+              'History' = "true"
+              'Coverage' = "true"
+              'MinimizeDetails' = "true"
+              'Articles' = "true"
+              'ReportFileType' = "XML"
+              'Title' = "false"
+              'Locale' = "en-US"
+            }
+          }
+          $output_runreport = Invoke-RestMethod @params -Body ($body|ConvertTo-JSON)
+          $report_ID = $output_runreport.Id
+          #Wait for report
+          $params = @{
+            Uri         = "$baseURL/Reports/$report_ID"
+            Method      = 'Get'
+            Headers = @{
+              'Content-Type' = 'application/json'
+              Authorization = "Bearer $bearer_token"
+            }
+          }
+          $report_status ="Not Ready"
+          while($report_status -ne "Ready"){
+            $output = Invoke-RestMethod @params
+            $report_status = $output.Status
+            Start-Sleep -Seconds 5
+            Write-Host "Generating XML Report... Progress: " $output.Progress "%"
+          }
+          #Download Report
+          $params = @{
+            Uri         = "$baseURL/Reports/Download/$report_ID"
+            Method      = 'Get'
+            Headers = @{
+              'Accept' = 'text/html'
+              Authorization = "Bearer $bearer_token"
+            }
+          }
+          $output_runreport = Invoke-RestMethod @params
+          Out-File -InputObject $output_runreport -FilePath .\AppScan_Security_Report.xml
+          
+          
+        shell: pwsh
+      - uses: actions/upload-artifact@v2
+        name: Upload HCL AppScan Static Analysis HTML Report to Github Artifacts
+        with:
+          name: AppScan Static Analysis HTML Security Scan Report 
+          path: AppScan_Security_Report.html
+          
+      - uses: actions/upload-artifact@v2
+        name: Upload HCL AppScan Static Analysis XML Report to Github Artifacts
+        with:
+          name: AppScan Static Analysis XML Security Scan Report 
+          path: AppScan_Security_Report.xml
