@@ -80,12 +80,7 @@ def logout(request):
     auth.logout(request)
     return redirect("/")
 
-def cart_session(request):
-    name = request.POST['name']
-    return redirect{'name':name}
-def shorting(request):
-    username = request.POST['username']
-    return render "?"
+
 
         
 
